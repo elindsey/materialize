@@ -489,7 +489,7 @@ fn substitute_vars(msg: &str, vars: &HashMap<String, String>) -> Result<String, 
 pub async fn create_state(
     config: &Config,
 ) -> Result<(State, impl Future<Output = Result<(), Error>>), Error> {
-    let seed = rand::thread_rng().gen();
+    let seed = 55u32; //rand::thread_rng().gen();
     let temp_dir = tempfile::tempdir().err_ctx("creating temporary directory")?;
 
     let materialized_catalog_path = if let Some(path) = &config.materialized_catalog_path {
@@ -567,6 +567,7 @@ pub async fn create_state(
         kafka_config.set("bootstrap.servers", &config.kafka_addr);
         kafka_config.set("group.id", "materialize-testdrive");
         kafka_config.set("auto.offset.reset", "earliest");
+        kafka_config.set("isolation.level", "read_committed");
         if let Some(cert_path) = &config.cert_path {
             kafka_config.set("security.protocol", "ssl");
             kafka_config.set("ssl.keystore.location", cert_path);
